@@ -2,6 +2,8 @@
 
 *For meetings that should've been emails.*
 
+[**Play Yeet Her →**](https://yeet-her.vercel.app)
+
 A ridiculous, cathartic office-satire distance-launch arcade game. Launch an
 annoying cartoon coworker in a rolling office chair and see how far you can
 send her — office, parking lot, city, countryside, clouds, and (if you're
