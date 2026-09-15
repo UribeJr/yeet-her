@@ -1,107 +1,136 @@
-# SEND HER FLYING
+# Send Her Flying
 
-*For meetings that should've been emails.*
+> A cathartic office-satire arcade game — launch your least favorite coworker in a rolling chair and see how far she flies.
 
-[**Play Yeet Her →**](https://yeet-her.vercel.app)
+[**Play the live demo →**](https://yeet-her.vercel.app)
 
-A ridiculous, cathartic office-satire distance-launch arcade game. Launch an
-annoying cartoon coworker in a rolling office chair and see how far you can
-send her — office, parking lot, city, countryside, clouds, and (if you're
-good/lucky) space.
+![Title screen](docs/readme/title.png)
 
-Everything is drawn procedurally at runtime (Phaser `Graphics` baked into
-textures) and all sound is synthesized with the Web Audio API — there are no
-image or audio assets, no external API keys, no backend, and no accounts.
+## Overview
 
-## Run it
+**Send Her Flying** (repo: `yeet-her`) is a browser-based distance-launch game built for one thing: ridiculous, skillful yeets. Pick an offense ("Scheduled a 4:30 PM meeting"), charge a wobbling launch meter, release for a perfect yeet, then ride bounces and mid-air Rage Boosts through office → parking lot → city → countryside → clouds → space.
+
+Everything — art and audio — is generated at runtime. No image packs, no sound files, no backend, no accounts. High score, career Rage Points, and sound preference live in `localStorage`.
+
+## Highlights
+
+- **Zero-asset pipeline** — Phaser `Graphics` baked into textures + Web Audio synthesis; ships as a pure front-end build
+- **Skillful charge meter** — oscillates and speeds up near the top so a **PERFECT YEET!** needs timing, not just max hold
+- **Readable flight loop** — gravity, bounce decay, and six interactive props (coffee cart, printer, mail cart, fan, Reply-All, HR couch) that help or hinder distance
+- **Desktop + mobile first-class** — mouse, touch, and spacebar unified through one input layer; 1280×720 canvas with Phaser `Scale.FIT`
+- **Instant restart** — charge → countdown → flight → landing runs as an in-scene state machine, so "YEET AGAIN" skips full scene teardown
+
+## Features
+
+- Pre-launch offense picker (presets + custom text)
+- Charge meter with perfect-zone bonus and short slow-mo juice
+- 3 Rage Boosts per run (forward + upward impulse)
+- Distance milestones and destination buckets (Break Room → Low Earth Orbit and beyond)
+- Procedural zones / parallax as you cross distance thresholds
+- Floating commentary, captions, and results overlay with personal-best tracking
+- Mute toggle persisted across sessions
+
+## How to play
+
+1. Open the [live demo](https://yeet-her.vercel.app) (or run locally — see Quick Start).
+2. Choose **what she did this time**, then hit Ready.
+3. **Hold** to charge. Watch the meter wobble — release in the high zone for **PERFECT YEET!**
+4. After the 3-2-1 countdown, fly. **Tap / click / space** to spend Rage Boosts (3 max).
+5. Hit helpful props, dodge the HR couch, bounce smartly, and land as far as you can.
+6. Check destination + Rage Points, then **YEET AGAIN**.
+
+## Controls
+
+| Action | Input |
+|---|---|
+| Charge | Hold mouse / touch / **Space** |
+| Launch | Release |
+| Rage Boost (while airborne) | Tap / click / **Space** |
+| Sound | Title-screen toggle |
+
+## Demo
+
+[**Play live →**](https://yeet-her.vercel.app)
+
+| Title | Charge |
+| --- | --- |
+| ![Title screen](docs/readme/title.png) | ![Charge meter](docs/readme/charge.png) |
+
+| Flight | Results |
+| --- | --- |
+| ![Mid-air flight](docs/readme/flight.png) | ![Results screen](docs/readme/results.png) |
+
+## Quick Start
+
+**Prerequisites:** Node.js (npm) and a modern browser.
 
 ```bash
+git clone https://github.com/UribeJr/yeet-her.git
+cd yeet-her
 npm install
-npm run dev       # starts a local dev server (opens automatically)
+npm run dev
 ```
 
 Other scripts:
 
 ```bash
-npm run typecheck # tsc --noEmit
-npm run build     # typecheck + production build to dist/
-npm run preview   # serve the production build locally
+npm run typecheck   # tsc --noEmit
+npm run build       # typecheck + production build → dist/
+npm run preview     # serve the production build locally
 ```
 
-High score, career Rage Points, and the sound on/off setting persist in the
-browser's `localStorage` — no account, no server.
+## Stack
 
-## Controls
+| Layer | Choice |
+|---|---|
+| Language | TypeScript |
+| Bundler / dev | Vite |
+| Game runtime | Phaser 3 |
+| Art | Procedural (`TextureFactory` / Phaser Graphics) |
+| Audio | Procedural (Web Audio API) |
+| Persistence | `localStorage` |
+| Hosting | Vercel (`yeet-her.vercel.app`) |
+| Backend | None |
 
-- **Hold** (mouse / touch / spacebar) to charge the launch meter. The meter
-  wobbles and speeds up near the top, so a **PERFECT YEET!** takes a
-  well-timed release, not just "hold as long as possible."
-- **Release** to fire the 3-2-1-YEET countdown and launch.
-- While airborne, **tap / click / spacebar** fires a **Rage Boost** (3 per
-  run) — a small forward+upward impulse. Timing it off a bounce or before a
-  milestone can add meaningful distance.
-- Bounce off the ground and fly through interactive objects (coffee cart,
-  printer, mail cart, industrial fan, Reply-All icon, HR couch) for
-  distance swings, good and bad.
+## Architecture
 
-## Project structure
+Thin Phaser bootstrap (`src/main.ts` → `GameConfig`) loads scenes: Boot → Preload → Title → PreLaunch → Game, with How-To and Results as additive overlays.
+
+`GameScene` owns the run as a `RunPhase` state machine (`CHARGE` → `COUNTDOWN` → `FLIGHT` → `ENDED`) so resets stay instant. Physics is computed in **feet / ft/s**; `RENDER_SCALE_PX_PER_FT` is the only feet→pixels conversion. Tunables, copy, art factory, and audio manager stay in focused modules under `src/config`, `src/content`, `src/world`, and `src/audio`.
 
 ```
 src/
-├── main.ts                    Phaser.Game bootstrap
-├── config/                    GameConfig (scale/render), Balance (tunables), Colors (palette)
-├── content/strings.ts         Offenses, commentary, milestone text, destination names, UI labels
-├── state/                     Persistence (localStorage), RunState (per-run transient state)
-├── entities/                  Coworker (character+chair Container), CoworkerAnimator (squash/stretch)
-├── physics/                   FlightPhysics (gravity/bounce), ChargeController (charge meter)
-├── world/                     TextureFactory (all procedural art), ZoneManager, ParallaxManager
-├── objects/                   ObjectDefs, Interactable, InteractableSpawner (the 6 hittable objects)
-├── ui/                        Button, ChargeMeter, HUD, MilestoneBanner, FloatingText, TextInputOverlay
-├── input/InputManager.ts      Unifies mouse/touch/spacebar into one down/up API
-├── audio/AudioManager.ts      Procedural Web Audio SFX (no audio files)
-└── scenes/                    Boot, Preload, Title, HowToPlay, PreLaunch, Game, ResultsOverlay
+├── main.ts                 Phaser.Game bootstrap
+├── config/                 GameConfig, Balance, Colors
+├── content/strings.ts      Offenses, milestones, UI labels
+├── state/                  Persistence, RunState
+├── entities/               Coworker + animator
+├── physics/                Flight + charge controllers
+├── world/                  TextureFactory, zones, parallax
+├── objects/                Interactable props + spawners
+├── ui/                     HUD, meters, banners, overlays
+├── input/InputManager.ts   Mouse / touch / space → one API
+├── audio/AudioManager.ts   Synthesized SFX
+└── scenes/                 Boot, Preload, Title, HowTo, PreLaunch, Game, Results
 ```
 
-`GameScene` owns the whole charge → countdown → flight → landing loop as one
-internal state machine (see `RunPhase` in `state/RunState.ts`) rather than as
-separate Phaser Scenes, so restarting a run (`GameScene.resetRun()`) is
-instant — no scene teardown/rebuild, no flicker. `ResultsOverlayScene` is a
-thin, stateless UI panel launched additively on top of the paused `GameScene`.
+## Tweaking
 
-## Tweaking the feel
+Nearly every feel constant lives in **`src/config/Balance.ts`**. Start with:
 
-Nearly every gameplay constant lives in one file: **`src/config/Balance.ts`**.
-The ones most worth playing with first:
+- **Launch power** — `CHARGE_MIN_POWER_FT_S` / `CHARGE_MAX_POWER_FT_S`, `CHARGE_HOLD_TO_MAX_MS`
+- **Perfect window** — `PERFECT_ZONE_MIN_PCT`, oscillator amplitude/frequency knobs
+- **Air feel** — `GRAVITY_FT_S2`, bounce restitution + decay, `STOP_SPEED_THRESHOLD_FT_S`
+- **Boosts & props** — `RAGE_BOOST_*`, `OBJECT_EFFECTS` weights/impulses
+- **World bands** — `ZONE_THRESHOLDS_FT`, `DESTINATION_BUCKETS_FT`
+- **Zoom only** — `RENDER_SCALE_PX_PER_FT` (does not change gameplay math)
 
-| Constant | Effect |
-|---|---|
-| `GRAVITY_FT_S2` | Lower = floatier, longer arcs. Higher = snappier, shorter hops. |
-| `CHARGE_MIN_POWER_FT_S` / `CHARGE_MAX_POWER_FT_S` | Launch speed range from a 0% vs. 100% charge. This is the single biggest lever on overall distance. |
-| `CHARGE_HOLD_TO_MAX_MS` | How long a hold takes to ramp the charge meter up. |
-| `CHARGE_OSC_AMPLITUDE_PCT` / `CHARGE_OSC_FREQ_HZ_BASE` / `_MAX` | How much the charge meter wobbles and how fast — the skill knob for landing a PERFECT YEET. |
-| `PERFECT_ZONE_MIN_PCT` / `PERFECT_ZONE_POWER_BONUS_PCT` | Charge % needed for "PERFECT YEET!" and its power bonus. |
-| `BOUNCE_RESTITUTION_START` / `BOUNCE_RESTITUTION_DECAY` | How bouncy the landing is and how fast bounces die out. |
-| `STOP_SPEED_THRESHOLD_FT_S` | Speed below which a run is declared over. |
-| `RAGE_BOOST_FORWARD_FT_S` / `RAGE_BOOST_UPWARD_FT_S` | Punch of each mid-air Rage Boost. |
-| `OBJECT_EFFECTS` | Per-object impulse/bonus magnitudes (coffee cart, printer, mail cart, fan, reply-all, HR couch) and their spawn `weightPct`. |
-| `ZONE_THRESHOLDS_FT` / `DESTINATION_BUCKETS_FT` | Distance bands for background zones and the results-screen "destination" name. |
+Rough distance bands from current tuning (no boosts/objects unless noted): weak tap ~300–1000 ft, solid mid-charge ~1500–4000 ft, perfect max charge alone ~5000–7000 ft; boosts + lucky hits push into 8000–15000+ ft, with rare runs reaching "space."
 
-Current balance targets (tuned by empirically sampling many charge/hold
-durations, see the constants above): a minimal/accidental tap lands around
-300-1000 ft, a solid mid-charge lands in the 1500-4000 ft range, and a
-perfectly-timed max charge alone (no boosts or lucky object hits) reaches
-roughly 5000-7000 ft. Rage Boosts and interactive objects are what push a
-good run into the 8000-15000+ ft "excellent" territory, and rare, near-ideal
-combinations can reach "space" (15000+ ft).
+## Project status
 
-Visual/scale note: physics is computed entirely in feet/feet-per-second;
-`RENDER_SCALE_PX_PER_FT` (also in `Balance.ts`) is the only place that gets
-converted to screen pixels, so changing it rescales the whole world's zoom
-level without touching any gameplay math.
+**Early / playable (v0.1.0).** Public repo with a live Vercel deploy. Core loop, procedural presentation, and local persistence are in place. A formal license is still an open item.
 
-## Browser support
+## License
 
-Desktop (mouse + spacebar) and mobile (touch) are both first-class inputs,
-unified through `src/input/InputManager.ts`. The canvas uses Phaser's
-`Scale.FIT` mode against a fixed 1280×720 logical resolution, so it letterboxes
-cleanly at any window size instead of reflowing UI.
+No `LICENSE` file in the repository yet. Treat the code as source-available until a license is added — ask before redistributing.
